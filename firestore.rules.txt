@@ -1,0 +1,52 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn() &&
+        exists(/databases/$(database)/documents/admins/$(request.auth.token.email));
+    }
+
+    // Manually managed in the console. A signed-in user may only check
+    // their own email's admin doc; nothing can write here from the client.
+    match /admins/{email} {
+      allow read: if isSignedIn() && request.auth.token.email == email;
+      allow write: if false;
+    }
+
+    // Each creator's application + approval record lives at creators/{uid}.
+    match /creators/{uid} {
+      allow get: if isSignedIn() && (request.auth.uid == uid || isAdmin());
+      allow list: if isAdmin();
+
+      // A user may create only their own application, and only as 'pending'.
+      allow create: if isSignedIn()
+        && request.auth.uid == uid
+        && request.resource.data.uid == uid
+        && request.resource.data.status == 'pending';
+
+      // Only admins can change status / set a referral code (approve/reject).
+      allow update: if isAdmin();
+      allow delete: if false;
+    }
+
+    // Click logs written by the public r.html redirect page (no auth there),
+    // read only by the owning creator (matched via their own referralCode)
+    // or an admin.
+    match /clicks/{clickId} {
+      allow create: if request.resource.data.keys().hasOnly(['code', 'timestamp'])
+        && request.resource.data.code is string
+        && request.resource.data.code.size() > 0;
+
+      allow get, list: if isAdmin() || (
+        isSignedIn() &&
+        exists(/databases/$(database)/documents/creators/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/creators/$(request.auth.uid)).data.referralCode == resource.data.code
+      );
+    }
+  }
+}

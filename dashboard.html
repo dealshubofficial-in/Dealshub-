@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Creator Dashboard — Dealshub Creators</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="site-header">
+  <a class="logo" href="index.html"><span class="dot"></span>Dealshub Creators</a>
+  <nav class="site-nav">
+    <a href="index.html">About the program</a>
+    <button class="btn btn-outline btn-sm" id="signOutBtn" style="display:none;">Sign out</button>
+  </nav>
+</header>
+
+<main class="section section--tight">
+  <div class="wrap" style="max-width:680px;">
+
+    <div id="loading" class="center" style="padding:4rem 0;"><span class="spinner"></span></div>
+
+    <!-- Signed out -->
+    <div id="signedOutView" style="display:none;">
+      <h1>Become a Dealshub Creator</h1>
+      <p>Sign in with Google to apply, or to check the status of an application you already submitted.</p>
+      <button class="g-btn" id="signInBtn">
+        <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84c-.21 1.13-.85 2.09-1.81 2.73v2.27h2.92c1.7-1.57 2.69-3.88 2.69-6.64z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.17l-2.92-2.27c-.81.54-1.84.86-3.04.86-2.34 0-4.32-1.58-5.03-3.71H.96v2.33C2.44 15.98 5.48 18 9 18z"/><path fill="#FBBC05" d="M3.97 10.71c-.18-.54-.28-1.11-.28-1.71s.1-1.17.28-1.71V4.96H.96C.35 6.18 0 7.55 0 9s.35 2.82.96 4.04l3.01-2.33z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0 5.48 0 2.44 2.02.96 4.96l3.01 2.33C4.68 5.16 6.66 3.58 9 3.58z"/></svg>
+        Continue with Google
+      </button>
+    </div>
+
+    <!-- Apply form (signed in, no application on file) -->
+    <div id="applyView" style="display:none;">
+      <h1>Apply to join</h1>
+      <p>Takes about two minutes. The Dealshub team reviews every application personally.</p>
+      <div id="applyError" class="msg msg--error" style="display:none;"></div>
+      <form class="form-card" id="applyForm">
+        <div class="field">
+          <label for="socialHandle">Where do you post?</label>
+          <input type="text" id="socialHandle" placeholder="Instagram @handle, YouTube channel, or blog URL" required>
+        </div>
+        <div class="field">
+          <label for="niche">What kind of content?</label>
+          <select id="niche" required>
+            <option value="">Select one</option>
+            <option>Deals & coupons</option>
+            <option>Fashion</option>
+            <option>Home & lifestyle</option>
+            <option>Tech & gadgets</option>
+            <option>Family & parenting</option>
+            <option>General / mixed</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="audience">Audience size (rough estimate)</label>
+          <input type="text" id="audience" placeholder="e.g. 8,000 followers">
+        </div>
+        <div class="field">
+          <label for="message">Anything else we should know?</label>
+          <textarea id="message" placeholder="How you'd plan to share Dealshub deals"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary" id="applySubmitBtn">Submit application</button>
+      </form>
+    </div>
+
+    <!-- Status views (signed in, application exists) -->
+    <div id="statusView" style="display:none;">
+      <h1 id="greeting"></h1>
+
+      <div id="pendingPanel" style="display:none;">
+        <span class="badge badge--pending">Pending review</span>
+        <p style="margin-top:1rem;">Your application is in the queue. You'll see this page update automatically once it's been reviewed — no need to apply again.</p>
+      </div>
+
+      <div id="rejectedPanel" style="display:none;">
+        <span class="badge badge--rejected">Not approved</span>
+        <p style="margin-top:1rem;">Your application wasn't approved this time. If you'd like to ask why or reapply later, reach out via <a href="https://www.dealshubofficial.com/contactus">the contact page</a>.</p>
+      </div>
+
+      <div id="approvedPanel" style="display:none;">
+        <span class="badge badge--approved">Approved Creator</span>
+
+        <div class="ticket" style="margin-top:1.2rem;">
+          <div class="ticket__main">
+            <h3>Your referral link</h3>
+            <p>Share this anywhere. Every click is logged to your stats below.</p>
+            <div class="copy-row">
+              <span id="refLink"></span>
+              <button class="btn btn-dark btn-sm" id="copyBtn">Copy link</button>
+            </div>
+            <p id="copiedNote" class="msg msg--ok" style="display:none;margin-top:.8rem;">Copied to clipboard.</p>
+          </div>
+          <div class="ticket__divider" aria-hidden="true"></div>
+          <div class="ticket__stub">
+            <span class="stub-label">Your code</span>
+            <span class="stub-code" id="refCode"></span>
+          </div>
+        </div>
+
+        <div class="stat-grid">
+          <div class="stat">
+            <div class="num" id="clickCount">—</div>
+            <div class="label">Total link clicks</div>
+          </div>
+          <div class="stat">
+            <div class="num" id="approvedSince">—</div>
+            <div class="label">Approved since</div>
+          </div>
+        </div>
+        <button class="btn btn-outline btn-sm" id="refreshStatsBtn">Refresh stats</button>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <span>Dealshub Creators · <a href="https://www.dealshubofficial.com/shop">Visit the shop</a></span>
+    <span><a href="index.html">About the program</a></span>
+  </div>
+</footer>
+
+<script type="module">
+import { auth, db, googleProvider, SHOP_URL } from "./firebase-config.js";
+import {
+  signInWithPopup, signOut, onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {
+  doc, getDoc, setDoc, serverTimestamp,
+  collection, query, where, getCountFromServer
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const $ = (id) => document.getElementById(id);
+const views = ['loading','signedOutView','applyView','statusView'];
+function show(id){ views.forEach(v => $(v).style.display = (v===id ? '' : 'none')); }
+
+$('signInBtn').onclick = () => {
+  signInWithPopup(auth, googleProvider).catch(err => alert("Sign-in failed: " + err.message));
+};
+$('signOutBtn').onclick = () => signOut(auth);
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    $('signOutBtn').style.display = 'none';
+    show('signedOutView');
+    return;
+  }
+  $('signOutBtn').style.display = '';
+  try {
+    const ref = doc(db, 'creators', user.uid);
+    const snap = await getDoc(ref);
+    if (!snap.exists()) {
+      show('applyView');
+      setupApplyForm(user);
+    } else {
+      show('statusView');
+      renderStatus(snap.data(), user);
+    }
+  } catch (err) {
+    show('signedOutView');
+    alert("Couldn't load your application: " + err.message);
+  }
+});
+
+function setupApplyForm(user){
+  $('applyForm').onsubmit = async (e) => {
+    e.preventDefault();
+    $('applyError').style.display = 'none';
+    $('applySubmitBtn').disabled = true;
+    $('applySubmitBtn').textContent = 'Submitting…';
+    try {
+      await setDoc(doc(db, 'creators', user.uid), {
+        uid: user.uid,
+        name: user.displayName || '',
+        email: user.email || '',
+        photoURL: user.photoURL || '',
+        social: $('socialHandle').value.trim(),
+        niche: $('niche').value,
+        audience: $('audience').value.trim(),
+        message: $('message').value.trim(),
+        status: 'pending',
+        createdAt: serverTimestamp()
+      });
+      const snap = await getDoc(doc(db, 'creators', user.uid));
+      show('statusView');
+      renderStatus(snap.data(), user);
+    } catch (err) {
+      $('applyError').textContent = "Couldn't submit: " + err.message;
+      $('applyError').style.display = '';
+      $('applySubmitBtn').disabled = false;
+      $('applySubmitBtn').textContent = 'Submit application';
+    }
+  };
+}
+
+function renderStatus(data, user){
+  $('greeting').textContent = `Hi, ${ (data.name || 'there').split(' ')[0] }`;
+  $('pendingPanel').style.display = 'none';
+  $('rejectedPanel').style.display = 'none';
+  $('approvedPanel').style.display = 'none';
+
+  if (data.status === 'pending') {
+    $('pendingPanel').style.display = '';
+  } else if (data.status === 'rejected') {
+    $('rejectedPanel').style.display = '';
+  } else if (data.status === 'approved') {
+    $('approvedPanel').style.display = '';
+    const code = data.referralCode || '';
+    const link = `${location.origin}${location.pathname.replace('dashboard.html','')}r.html?code=${encodeURIComponent(code)}`;
+    $('refLink').textContent = link;
+    $('refCode').textContent = code;
+    $('approvedSince').textContent = data.approvedAt?.toDate
+      ? data.approvedAt.toDate().toLocaleDateString()
+      : '—';
+
+    $('copyBtn').onclick = () => {
+      navigator.clipboard.writeText(link).then(() => {
+        $('copiedNote').style.display = '';
+        setTimeout(() => $('copiedNote').style.display = 'none', 2000);
+      });
+    };
+
+    loadClickCount(code);
+    $('refreshStatsBtn').onclick = () => loadClickCount(code);
+  }
+}
+
+async function loadClickCount(code){
+  if (!code) return;
+  $('clickCount').textContent = '…';
+  try {
+    const q = query(collection(db, 'clicks'), where('code', '==', code));
+    const snap = await getCountFromServer(q);
+    $('clickCount').textContent = snap.data().count;
+  } catch (err) {
+    $('clickCount').textContent = '—';
+  }
+}
+</script>
+</body>
+</html>

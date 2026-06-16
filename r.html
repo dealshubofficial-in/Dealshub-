@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Redirecting to Dealshub…</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<main class="section center">
+  <div class="wrap">
+    <span class="spinner" style="margin-bottom:1rem;"></span>
+    <h2>Taking you to Dealshub…</h2>
+    <p>If you're not redirected in a moment, <a id="fallback" href="https://www.dealshubofficial.com/shop">tap here</a>.</p>
+  </div>
+</main>
+
+<script type="module">
+import { db, SHOP_URL } from "./firebase-config.js";
+import { collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const code = new URLSearchParams(location.search).get('code') || '';
+const destination = code ? `${SHOP_URL}?ref=${encodeURIComponent(code)}` : SHOP_URL;
+document.getElementById('fallback').href = destination;
+
+function logClick(){
+  if (!code) return Promise.resolve();
+  return addDoc(collection(db, 'clicks'), { code, timestamp: serverTimestamp() }).catch(() => {});
+}
+function delay(ms){ return new Promise(res => setTimeout(res, ms)); }
+
+Promise.race([logClick(), delay(1500)]).finally(() => {
+  location.replace(destination);
+});
+</script>
+</body>
+</html>
