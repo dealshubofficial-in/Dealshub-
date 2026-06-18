@@ -127,7 +127,7 @@
 <script type="module">
 import { auth, db, googleProvider, SHOP_URL } from "./firebase-config.js";
 import {
-  signInWithPopup, signOut, onAuthStateChanged
+  signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
   doc, getDoc, setDoc, serverTimestamp,
@@ -139,9 +139,13 @@ const views = ['loading','signedOutView','applyView','statusView'];
 function show(id){ views.forEach(v => $(v).style.display = (v===id ? '' : 'none')); }
 
 $('signInBtn').onclick = () => {
-  signInWithPopup(auth, googleProvider).catch(err => alert("Sign-in failed: " + err.message));
+  signInWithRedirect(auth, googleProvider);
 };
 $('signOutBtn').onclick = () => signOut(auth);
+
+getRedirectResult(auth).catch(err => {
+  if (err) alert("Sign-in failed: " + err.message);
+});
 
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
