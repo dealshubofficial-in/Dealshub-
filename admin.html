@@ -8,6 +8,22 @@
 </head>
 <body>
 
+<div id="debugError" style="display:none;position:fixed;bottom:0;left:0;right:0;background:#D63B5C;color:#fff;padding:.9rem 1rem;font-family:monospace;font-size:.78rem;z-index:9999;word-break:break-word;max-height:40vh;overflow:auto;"></div>
+<script>
+  function showDebugError(msg){
+    var el = document.getElementById('debugError');
+    el.style.display = 'block';
+    el.textContent = (el.textContent ? el.textContent + '\n---\n' : '') + msg;
+  }
+  window.addEventListener('error', function(e){
+    showDebugError('Error: ' + e.message + ' @ ' + (e.filename || '') + ':' + e.lineno);
+  });
+  window.addEventListener('unhandledrejection', function(e){
+    var r = e.reason;
+    showDebugError('Promise error: ' + (r && r.message ? r.message : r));
+  });
+</script>
+
 <header class="site-header">
   <a class="logo" href="index.html"><span class="dot"></span>Dealshub Creators · Admin</a>
   <nav class="site-nav">
@@ -62,12 +78,18 @@ const $ = (id) => document.getElementById(id);
 const views = ['loading','signedOutView','notAdminView','adminView'];
 function show(id){ views.forEach(v => $(v).style.display = (v===id ? '' : 'none')); }
 
-$('signInBtn').onclick = () => signInWithRedirect(auth, googleProvider);
+$('signInBtn').onclick = () => {
+  try {
+    signInWithRedirect(auth, googleProvider).catch(err => showDebugError("Sign-in failed: " + err.code + " — " + err.message));
+  } catch (err) {
+    showDebugError("Sign-in click failed: " + err.message);
+  }
+};
 $('signOutBtn').onclick = () => signOut(auth);
 $('signOutBtn2').onclick = () => signOut(auth);
 
 getRedirectResult(auth).catch(err => {
-  if (err) alert("Sign-in failed: " + err.message);
+  if (err) showDebugError("Redirect result error: " + err.code + " — " + err.message);
 });
 
 let data = { pending: [], approved: [], rejected: [] };
@@ -84,6 +106,7 @@ onAuthStateChanged(auth, async (user) => {
     await loadAll();
   } catch (err) {
     show('notAdminView');
+    showDebugError("Admin check error: " + err.code + " — " + err.message);
   }
 });
 
