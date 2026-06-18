@@ -51,7 +51,7 @@
 <script type="module">
 import { auth, db, googleProvider, SHOP_URL } from "./firebase-config.js";
 import {
-  signInWithPopup, signOut, onAuthStateChanged
+  signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
   doc, getDoc, updateDoc, serverTimestamp,
@@ -62,9 +62,13 @@ const $ = (id) => document.getElementById(id);
 const views = ['loading','signedOutView','notAdminView','adminView'];
 function show(id){ views.forEach(v => $(v).style.display = (v===id ? '' : 'none')); }
 
-$('signInBtn').onclick = () => signInWithPopup(auth, googleProvider).catch(e => alert(e.message));
+$('signInBtn').onclick = () => signInWithRedirect(auth, googleProvider);
 $('signOutBtn').onclick = () => signOut(auth);
 $('signOutBtn2').onclick = () => signOut(auth);
+
+getRedirectResult(auth).catch(err => {
+  if (err) alert("Sign-in failed: " + err.message);
+});
 
 let data = { pending: [], approved: [], rejected: [] };
 let activeTab = 'pending';
