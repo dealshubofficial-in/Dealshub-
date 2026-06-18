@@ -23,12 +23,12 @@ import { getAuth, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/
 import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSy...",
+  apiKey: "AIzaSyCsMN8Vbqjp34p6_0xqt8yd2PdvjbPE67Q",
   authDomain: "dealshubofficial.firebaseapp.com",
   projectId: "dealshubofficial",
   storageBucket: "dealshubofficial.firebasestorage.app",
   messagingSenderId: "137265492078",
-  appId: "1:137265492078:web:..."
+  appId: "1:137265492078:web:b529eeec9234ccf21b367f"
 };
 
 export const app = initializeApp(firebaseConfig);
